@@ -20,6 +20,7 @@ export const register = catchAsyncError(async (req,res,next) =>{
     (`INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *`, 
         [name, email, hashedPassword]
     );
+    sendToken(user.rows[0],201,"Registered Successfully",res);
 });
 
 export const login = catchAsyncError(async (req,res,next) =>{
