@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import fileUpload from 'express-fileupload';
 import { createTables } from './utils/createTables.js';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
+import authRouter from './router/auth_Routes.js';
 
 const app = express(); 
 
@@ -30,6 +31,8 @@ app.use(
 );
 
 createTables();
+
+app.use('/api/v1/auth', authRouter);
 
 app.use(errorMiddleware);
 
