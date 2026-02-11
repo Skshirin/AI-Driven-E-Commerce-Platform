@@ -1,5 +1,5 @@
 import express from 'express';
-import { login, register, logout, getUser } from '../controllers/authController.js';
+import { login, register, logout, getUser, forgotPassword } from '../controllers/authController.js';
 import { isAuthenticated } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -12,5 +12,6 @@ router.get('/logout', isAuthenticated, logout);
 
 router.get('/me', isAuthenticated, getUser);
 
+router.post('/password/forgot', forgotPassword);
 
 export default router;
