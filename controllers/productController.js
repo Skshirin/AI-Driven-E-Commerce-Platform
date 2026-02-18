@@ -2,6 +2,7 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { errorhandler } from "../middlewares/errorMiddleware.js";
 import {v2 as cloudinary} from "cloudinary";
 import database from "../database/db.js";
+import { response } from "express";
 
 export const createProduct = catchAsyncError(async (req, res, next) => {
     const { name, description, price, category,stock } = req.body;
@@ -171,4 +172,71 @@ export const fetchAllProducts = catchAsyncError(async (req, res, next) => {
     newProducts: newProductsResult.rows,
     topRatedProducts: topRatedResult.rows,
   });
+});
+
+export const updateProduct = catchAsyncError(async (req, res, next) => {
+    const { productId } = req.params;
+    const { name, description, price, category, stock } = req.body;
+
+    if (!name || !description || !price || !category || !stock) {
+        return next(new errorhandler("Please fill all the fields", 400));
+    }
+
+    const product = await database.query(
+        `SELECT * FROM products WHERE id = $1`,
+        [productId]
+    );
+
+    if (product.rows.length === 0) {
+        return next(new errorhandler("Product not found", 404));
+    }
+
+    const result = await database.query(
+        `update products SET
+         name = $1,
+         description = $2,
+         price = $3, 
+         category = $4, 
+         stock = $5 WHERE id = $6 RETURNING *`,
+        [name, description, price / 90, category, stock, productId]
+    );
+
+    res.status(200).json({
+        success: true,
+        message: "Product updated successfully",
+        updatedProduct: result.rows[0]
+    });
+});
+
+export const deleteProduct = catchAsyncError(async (req, res, next) => {
+    const { productId } = req.params;
+    const product = await database.query(
+        `SELECT * FROM products WHERE id = $1`,
+        [productId]
+    );
+    if (product.rows.length === 0) {
+        return next(new errorhandler("Product not found", 404));
+    }
+
+    const images = product.rows[0].images;
+    
+    const deleteResult = await database.query(
+        `DELETE FROM products WHERE id = $1`,
+        [productId]
+    );
+
+    if (deleteResult.rowCount === 0) {
+        return next(new errorhandler("Product not deleted", 500));
+    }
+    
+    if (images && images.length > 0) {
+      for (const image of images) {
+        await cloudinary.uploader.destroy(image.public_id);
+    }
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "Product deleted successfully",
+    });
 });
