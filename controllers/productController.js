@@ -228,7 +228,7 @@ export const deleteProduct = catchAsyncError(async (req, res, next) => {
     if (deleteResult.rowCount === 0) {
         return next(new errorhandler("Product not deleted", 500));
     }
-    
+
     if (images && images.length > 0) {
       for (const image of images) {
         await cloudinary.uploader.destroy(image.public_id);
@@ -239,4 +239,94 @@ export const deleteProduct = catchAsyncError(async (req, res, next) => {
         success: true,
         message: "Product deleted successfully",
     });
+});
+
+export const fetchSingleProduct = catchAsyncError(async (req, res, next) => {
+  const { productId } = req.params;
+  const result = await database.query(
+    `SELECT p.*,
+    COALESCE(
+    json_agg(
+      json_build_object(
+        'review_id', r.id,
+        'rating', r.rating,
+        'comment', r.comment,
+        'reviewer' , json_build_object(
+        'id', u.id,
+        'name', u.name,
+        'avatar', u.avatar
+      ))
+  ) FILTER (WHERE r.id IS NOT NULL), '[]') AS reviews
+    FROM products p
+    LEFT JOIN products_review r ON p.id = r.product_id
+    LEFT JOIN users u ON r.user_id = u.id
+    WHERE p.id = $1
+    GROUP BY p.id`,
+    [productId]
+  );
+  res.status(200).json({
+    success: true,
+    product: result.rows[0],
+  });
+});
+
+export const postProductReview = catchAsyncError(async (req, res, next) => {
+  const { productId } = req.params;
+  const { rating, comment } = req.body;
+  if (!rating || !comment) {
+    return next(new errorhandler("Please provide rating and comment", 400));
+  }
+  const purchaseCheckQuery = `
+    SELECT oi.product_id
+    FROM order_items oi
+    JOIN orders o ON o.id = oi.order_id
+    Join payments p ON p.order_id = o.id
+    WHERE o.buyer_id = $1
+    AND oi.product_id = $2
+    AND p.payment_status = 'paid'
+    LIMIT 1
+  `;
+
+  const {rows} = await database.query(purchaseCheckQuery, [
+    req.user.id,
+    productId
+  ]);
+
+  if (rows.length === 0) {
+    return res.status(403).json({
+      success: false,
+      message: "You can only review products you have purchased",
+    });
+  }
+
+  const product = await database.query(
+    `SELECT * FROM products WHERE id = $1`,
+    [productId]
+  );
+  if (product.rows.length === 0) {
+    return next(new errorhandler("Product not found", 404));
+  }
+
+  const isAlreadyReviewed = await database.query(
+    `SELECT * FROM products_review WHERE product_id = $1 AND user_id = $2`,
+    [productId, req.user.id]
+  );
+  if (isAlreadyReviewed.rows.length > 0) {
+    review = await database.query(
+      `UPDATE products_review 
+       SET rating = $1,
+       comment = $2
+       WHERE product_id = $3
+       AND user_id = $4 RETURNING *`,
+      [rating, comment, productId, req.user.id]
+    );
+  }
+  else {
+    review = await database.query(
+      `INSERT INTO products_review
+       (rating, comment, product_id, user_id)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [rating, comment, productId, req.user.id]
+    );
+  }
 });

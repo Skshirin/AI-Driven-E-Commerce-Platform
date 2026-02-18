@@ -1,5 +1,5 @@
 import express from "express";
-import { createProduct, fetchAllProducts, updateProduct, deleteProduct} from "../controllers/productController.js";
+import { createProduct, fetchAllProducts, updateProduct, deleteProduct, fetchSingleProduct, postProductReview} from "../controllers/productController.js";
 import { isAuthenticated } from "../middlewares/authMiddleware.js";
 import { authorizedRoles } from "../middlewares/authMiddleware.js";
 
@@ -28,5 +28,8 @@ router.delete(
     deleteProduct
 );
 
+router.get("/singleProduct/:productId", fetchSingleProduct);
+
+router.get("/postProductReview/:productId", isAuthenticated, fetchSingleProduct);
 
 export default router;
