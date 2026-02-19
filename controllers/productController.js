@@ -88,7 +88,7 @@ export const fetchAllProducts = catchAsyncError(async (req, res, next) => {
     index++;
   }
 
-  // Filter products by rating
+  // Filter products by ratings
   if (ratings) {
     conditions.push(`ratings >= $${index}`);
     values.push(ratings);
@@ -152,7 +152,7 @@ export const fetchAllProducts = catchAsyncError(async (req, res, next) => {
   `;
   const newProductsResult = await database.query(newProductsQuery);
 
-  // QUERY FOR FETCHING TOP RATING PRODUCTS (rating >= 4.5)
+  // QUERY FOR FETCHING TOP ratings PRODUCTS (ratings >= 4.5)
   const topRatedQuery = `
     SELECT p.*,
     COUNT(r.id) AS review_count
@@ -249,7 +249,7 @@ export const fetchSingleProduct = catchAsyncError(async (req, res, next) => {
     json_agg(
       json_build_object(
         'review_id', r.id,
-        'rating', r.rating,
+        'ratings', r.ratings,
         'comment', r.comment,
         'reviewer' , json_build_object(
         'id', u.id,
@@ -272,9 +272,9 @@ export const fetchSingleProduct = catchAsyncError(async (req, res, next) => {
 
 export const postProductReview = catchAsyncError(async (req, res, next) => {
   const { productId } = req.params;
-  const { rating, comment } = req.body;
-  if (!rating || !comment) {
-    return next(new errorhandler("Please provide rating and comment", 400));
+  const { ratings, comment } = req.body;
+  if (!ratings || !comment) {
+    return next(new errorhandler("Please provide ratings and comment", 400));
   }
   const purchaseCheckQuery = `
     SELECT oi.product_id
@@ -314,19 +314,66 @@ export const postProductReview = catchAsyncError(async (req, res, next) => {
   if (isAlreadyReviewed.rows.length > 0) {
     review = await database.query(
       `UPDATE products_review 
-       SET rating = $1,
+       SET ratings = $1,
        comment = $2
        WHERE product_id = $3
        AND user_id = $4 RETURNING *`,
-      [rating, comment, productId, req.user.id]
+      [ratings, comment, productId, req.user.id]
     );
   }
   else {
     review = await database.query(
       `INSERT INTO products_review
-       (rating, comment, product_id, user_id)
+       (ratings, comment, product_id, user_id)
        VALUES ($1, $2, $3, $4) RETURNING *`,
-      [rating, comment, productId, req.user.id]
+      [ratings, comment, productId, req.user.id]
     );
   }
+
+  const allReviews = await database.query(
+    `SELECT AVG(ratings) AS avg_ratings FROM products_review WHERE product_id = $1`,
+    [productId]
+  );
+  const newAvgratings = allReviews.rows[0].avg_ratings;
+  const updatedProduct = await database.query(
+    `UPDATE products SET ratings = $1 WHERE id = $2 RETURNING *`,
+    [newAvgratings, productId]
+  );
+  res.status(200).json({
+    success: true,
+    message: "Review submitted successfully",
+    review: review.rows[0],
+    Product: updatedProduct.rows[0],
+  });
 });
+
+export const deleteReview = catchAsyncError(async (req, res, next) => {
+  const { productId } = req.params;
+  const review = await database.query(
+    `DELETE FROM products_review
+     WHERE product_id = $1
+     AND user_id = $2 RETURNING *`,
+    [productId, req.user.id]
+  );
+
+  if (review.rows.length === 0) {
+    return next(new errorhandler("Review not found or already deleted", 404));
+  }
+
+  const allReviews = await database.query(
+    `SELECT AVG(ratings) AS avg_ratings FROM products_review WHERE product_id = $1`,
+    [productId]
+  );
+  const newAvgratings = allReviews.rows[0].avg_ratings;
+  const updatedProduct = await database.query(
+    `UPDATE products SET ratings = $1 WHERE id = $2 RETURNING *`,
+    [newAvgratings, productId]
+  );
+  res.status(200).json({
+    success: true,
+    message: "Review deleted successfully",
+    Product: updatedProduct.rows[0],
+  });
+
+});
+
