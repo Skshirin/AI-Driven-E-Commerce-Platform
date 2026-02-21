@@ -471,7 +471,7 @@ export const fetchAIFilteredProducts = catchAsyncError(
         .split(/\s+/)
         .filter((word) => !stopWords.has(word))
         .map((word) => `%${word}%`);
-    };
+    }; 
 
     const keywords = filterKeywords(userPrompt);
     // STEP 1: Basic SQL Filtering

@@ -7,6 +7,7 @@ import { createTables } from './utils/createTables.js';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import authRouter from './router/auth_Routes.js';
 import productRouter from './router/Product_Routes.js';
+import adminRouter from './router/admin_Routes.js';
 
 const app = express(); 
 
@@ -35,6 +36,8 @@ createTables();
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/product', productRouter);
+app.use('/api/v1/admin', adminRouter);
+
 app.use(errorMiddleware);
 
 export default app;
