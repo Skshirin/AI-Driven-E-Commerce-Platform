@@ -1,12 +1,14 @@
 import pkg from "pg" ;
 
 const { Client } = pkg;
+import dotenv from "dotenv";
+dotenv.config();
 
 export const database = new Client({
     host: process.env.DB_HOST,
-    database: "evocartdb",
-    user: "postgres",
-    password: "shirin",
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
 });
 

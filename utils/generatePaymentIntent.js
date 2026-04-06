@@ -1,7 +1,9 @@
 import database from "../database/db.js";
 import Stripe from "stripe";
+import dotenv from "dotenv";
+dotenv.config();
 
-const stripe = new Stripe("sk_test_51TFVd4LVeZSEYsovDppyMt3DhVSpFzv9iWCEyOW4Gs4PxQ5pg7ctHxce7kcRzEmKwQYLGTKADQ4U6gC0LpmXdzha00SrxGFiMq");
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const generatePaymentIntent = async (orderId, totalPrice) => {
     try {
