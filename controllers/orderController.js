@@ -25,7 +25,7 @@ export const placeNewOrder = catchAsyncError(async (req, res, next) => {
         return next(new errorhandler("Order items cannot be empty", 400));
     }
 
-    const productIds = items.map(item => item.product.id);
+    const productIds = items.map(item => item.product_id);
     const {rows: products} = await database.query(
         `SELECT id, price, stock, name FROM products WHERE id = ANY($1::uuid[])`,
         [productIds]
@@ -36,9 +36,9 @@ export const placeNewOrder = catchAsyncError(async (req, res, next) => {
     const placeholders = [];
 
     items.forEach((item, index) => {
-        const product = products.find(p => p.id === item.product.id);
+        const product = products.find(p => p.id === item.product_id);
         if (!product) {
-            return next(new errorhandler(`Product with ID ${item.product} not found`, 404));
+            return next(new errorhandler(`Product with ID ${item.product_id} not found`, 404));
         }
         if (item.quantity > product.stock) {
             return next(
@@ -52,10 +52,10 @@ export const placeNewOrder = catchAsyncError(async (req, res, next) => {
         total_price += item_total;
         values.push(
             null, 
-            item.product.id, 
+            item.product_id, 
             item.quantity,
             product.price, 
-            item.product.images[0].url || "", 
+            product.images?.[0]?.url || "",
             product.name);
 
             const offset = index * 6;
@@ -152,5 +152,10 @@ export const fetchSingleOrder = catchAsyncError(async (req, res, next) => {
         LEFT JOIN shipping_info s ON o.id = s.order_id
         WHERE o.id = $1
         GROUP BY o.id, s.id;
-    `)
+    `, [orderId]);
+    res.status(200).json({
+        success: true,
+        message: "Order fetched successfully",
+        orders: result.rows[0]
+    });
 });

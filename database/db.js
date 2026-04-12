@@ -1,8 +1,9 @@
 import pkg from "pg" ;
 
 const { Client } = pkg;
-import dotenv from "dotenv";
-dotenv.config();
+
+import { config } from "dotenv";
+config({path: './config/config.env'});
 
 export const database = new Client({
     host: process.env.DB_HOST,
