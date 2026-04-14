@@ -200,3 +200,89 @@ GROUP BY o.id, s.id
     myOrders: result.rows,
   });
 });
+
+export const fetchAllOrders = catchAsyncError(async (req, res, next) => {
+  const result = await database.query(`
+            SELECT o.*,
+ COALESCE(json_agg(
+ json_build_object(
+ 'order_item_id', oi.id,
+ 'order_id', oi.order_id,
+ 'product_id', oi.product_id,
+ 'quantity', oi.quantity,
+ 'price', oi.price,
+ 'image', oi.image,
+ 'title', oi.title
+)
+) FILTER (WHERE oi.id IS NOT NULL), '[]' ) AS order_items, json_build_object(
+'full_name', s.full_name,
+ 'state', s.state,
+ 'city', s.city,
+ 'country', s.country,
+ 'address', s.address,
+ 'pincode', s.pincode,
+ 'phone', s.phone 
+) AS shipping_info
+FROM orders o
+LEFT JOIN order_items oi ON o.id = oi.order_id
+LEFT JOIN shipping_info s ON o.id = s.order_id
+WHERE o.paid_at IS NOT NULL
+GROUP BY o.id, s.id
+        `);
+
+  res.status(200).json({
+    success: true,
+    message: "All orders fetched.",
+    orders: result.rows,
+  });
+});
+
+export const updateOrderStatus = catchAsyncErrors(async (req, res, next) => {
+  const { status } = req.body;
+  if (!status) {
+    return next(new ErrorHandler("Provide a valid status for order.", 400));
+  }
+  const { orderId } = req.params;
+  const results = await database.query(
+    `
+    SELECT * FROM orders WHERE id = $1
+    `,
+    [orderId]
+  );
+
+  if (results.rows.length === 0) {
+    return next(new ErrorHandler("Invalid order ID.", 404));
+  }
+
+  const updatedOrder = await database.query(
+    `
+    UPDATE orders SET order_status = $1 WHERE id = $2 RETURNING *
+    `,
+    [status, orderId]
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Order status updated.",
+    updatedOrder: updatedOrder.rows[0],
+  });
+});
+
+export const deleteOrder = catchAsyncErrors(async (req, res, next) => {
+  const { orderId } = req.params;
+  const results = await database.query(
+    `
+        DELETE FROM orders WHERE id = $1 RETURNING *
+        `,
+    [orderId]
+  );
+  if (results.rows.length === 0) {
+    return next(new ErrorHandler("Invalid order ID.", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Order deleted.",
+    order: results.rows[0],
+  });
+});
