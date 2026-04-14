@@ -153,6 +153,9 @@ export const fetchSingleOrder = catchAsyncError(async (req, res, next) => {
         WHERE o.id = $1
         GROUP BY o.id, s.id;
     `, [orderId]);
+    if (result.rows.length === 0) {
+        return next(new errorhandler("Order not found", 404));
+    }
     res.status(200).json({
         success: true,
         message: "Order fetched successfully",
@@ -164,77 +167,84 @@ export const fetchMyOrders = catchAsyncError(async (req, res, next) => {
     const result = await database.query(
     `
         SELECT o.*, COALESCE(
- json_agg(
-  json_build_object(
- 'order_item_id', oi.id,
- 'order_id', oi.order_id,
- 'product_id', oi.product_id,
- 'quantity', oi.quantity,
- 'price', oi.price,
- 'image', oi.image,
- 'title', oi.title
-  ) 
- ) FILTER (WHERE oi.id IS NOT NULL), '[]'
- ) AS order_items,
-json_build_object(
- 'full_name', s.full_name,
- 'state', s.state,
- 'city', s.city,
- 'country', s.country,
- 'address', s.address,
- 'pincode', s.pincode,
- 'phone', s.phone
- ) AS shipping_info 
- FROM orders o
- LEFT JOIN order_items oi ON o.id = oi.order_id
- LEFT JOIN shipping_info s ON o.id = s.order_id
-WHERE o.buyer_id = $1
-GROUP BY o.id, s.id
-        `,
-    [req.user.id]
-  );
+    json_agg(
+    json_build_object(
+    'order_item_id', oi.id,
+    'order_id', oi.order_id,
+    'product_id', oi.product_id,
+    'quantity', oi.quantity,
+    'price', oi.price,
+    'image', oi.image,
+    'title', oi.title
+    ) 
+    ) FILTER (WHERE oi.id IS NOT NULL), '[]'
+    ) AS order_items,
+    json_build_object(
+    'full_name', s.full_name,
+    'state', s.state,
+    'city', s.city,
+    'country', s.country,
+    'address', s.address,
+    'pincode', s.pincode,
+    'phone', s.phone
+    ) AS shipping_info 
+    FROM orders o
+    LEFT JOIN order_items oi ON o.id = oi.order_id
+    LEFT JOIN shipping_info s ON o.id = s.order_id
+    WHERE o.buyer_id = $1
+    GROUP BY o.id, s.id
+            `,
+        [req.user.id]
+    );
 
-  res.status(200).json({
-    success: true,
-    message: "All your orders are fetched.",
-    myOrders: result.rows,
-  });
+    res.status(200).json({
+        success: true,
+        message: "All your orders are fetched.",
+        numberOfOrders: result.rows.length,
+        myOrders: result.rows,
+    });
 });
 
 export const fetchAllOrders = catchAsyncError(async (req, res, next) => {
-  const result = await database.query(`
-            SELECT o.*,
- COALESCE(json_agg(
- json_build_object(
- 'order_item_id', oi.id,
- 'order_id', oi.order_id,
- 'product_id', oi.product_id,
- 'quantity', oi.quantity,
- 'price', oi.price,
- 'image', oi.image,
- 'title', oi.title
-)
-) FILTER (WHERE oi.id IS NOT NULL), '[]' ) AS order_items, json_build_object(
-'full_name', s.full_name,
- 'state', s.state,
- 'city', s.city,
- 'country', s.country,
- 'address', s.address,
- 'pincode', s.pincode,
- 'phone', s.phone 
-) AS shipping_info
-FROM orders o
-LEFT JOIN order_items oi ON o.id = oi.order_id
-LEFT JOIN shipping_info s ON o.id = s.order_id
-WHERE o.paid_at IS NOT NULL
-GROUP BY o.id, s.id
-        `);
+    const result = await database.query(`
+    SELECT 
+    o.*,
 
-  res.status(200).json({
-    success: true,
-    message: "All orders fetched.",
-    orders: result.rows,
-  });
+    u.name AS customer_name,
+    u.email AS customer_email,
+
+    COALESCE(json_agg(
+    json_build_object(
+    'order_item_id', oi.id,
+    'order_id', oi.order_id,
+    'product_id', oi.product_id,
+    'quantity', oi.quantity,
+    'price', oi.price,
+    'image', oi.image,
+    'title', oi.title
+    )
+    ) FILTER (WHERE oi.id IS NOT NULL), '[]' ) AS order_items, json_build_object(
+    'full_name', s.full_name,
+    'state', s.state,
+    'city', s.city,
+    'country', s.country,
+    'address', s.address,
+    'pincode', s.pincode,
+    'phone', s.phone 
+    ) AS shipping_info
+    FROM orders o
+    LEFT JOIN users u ON o.buyer_id = u.id
+    LEFT JOIN order_items oi ON o.id = oi.order_id
+    LEFT JOIN shipping_info s ON o.id = s.order_id
+    GROUP BY u.name, u.email, o.id, s.id
+    `);
+
+    res.status(200).json({
+        success: true,
+        message: "All orders fetched.",
+        numberOfOrders: result.rows.length,
+        orders: result.rows,
+    });
 });
 
 export const updateOrderStatus = catchAsyncError(async (req, res, next) => {

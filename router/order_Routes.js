@@ -3,9 +3,9 @@ import {
   placeNewOrder,
   fetchSingleOrder,
   fetchMyOrders,
-  // fetchAllOrders,
-  // updateOrderStatus,
-  // deleteOrder,
+  fetchAllOrders,
+  updateOrderStatus,
+  deleteOrder,
 } from "../controllers/orderController.js";
 import {
   isAuthenticated,
@@ -16,23 +16,23 @@ const router = express.Router();
 router.post("/new", isAuthenticated, placeNewOrder);
 router.get("/:orderId", isAuthenticated, fetchSingleOrder);
 router.get("/orders/me", isAuthenticated, fetchMyOrders);
-// router.get(
-//   "/admin/getall",
-//   isAuthenticated,
-//   authorizedRoles("Admin"),
-//   fetchAllOrders
-// );
-// router.put(
-//   "/admin/update/:orderId",
-//   isAuthenticated,
-//   authorizedRoles("Admin"),
-//   updateOrderStatus
-// );
-// router.delete(
-//   "/admin/delete/:orderId",
-//   isAuthenticated,
-//   authorizedRoles("Admin"),
-//   deleteOrder
-// );
+router.get(
+  "/admin/getall",
+  isAuthenticated,
+  authorizedRoles("admin"),
+  fetchAllOrders
+);
+router.put(
+  "/admin/update/:orderId",
+  isAuthenticated,
+  authorizedRoles("admin"),
+  updateOrderStatus
+);
+router.delete(
+  "/admin/delete/:orderId",
+  isAuthenticated,
+  authorizedRoles("admin"),
+  deleteOrder
+);
 
 export default router;
