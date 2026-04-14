@@ -237,10 +237,10 @@ GROUP BY o.id, s.id
   });
 });
 
-export const updateOrderStatus = catchAsyncErrors(async (req, res, next) => {
+export const updateOrderStatus = catchAsyncError(async (req, res, next) => {
   const { status } = req.body;
   if (!status) {
-    return next(new ErrorHandler("Provide a valid status for order.", 400));
+    return next(new errorhandler("Provide a valid status for order.", 400));
   }
   const { orderId } = req.params;
   const results = await database.query(
@@ -251,7 +251,7 @@ export const updateOrderStatus = catchAsyncErrors(async (req, res, next) => {
   );
 
   if (results.rows.length === 0) {
-    return next(new ErrorHandler("Invalid order ID.", 404));
+    return next(new errorhandler("Invalid order ID.", 404));
   }
 
   const updatedOrder = await database.query(
@@ -268,7 +268,7 @@ export const updateOrderStatus = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-export const deleteOrder = catchAsyncErrors(async (req, res, next) => {
+export const deleteOrder = catchAsyncError(async (req, res, next) => {
   const { orderId } = req.params;
   const results = await database.query(
     `
@@ -277,7 +277,7 @@ export const deleteOrder = catchAsyncErrors(async (req, res, next) => {
     [orderId]
   );
   if (results.rows.length === 0) {
-    return next(new ErrorHandler("Invalid order ID.", 404));
+    return next(new errorhandler("Invalid order ID.", 404));
   }
 
   res.status(200).json({
