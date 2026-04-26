@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../lib/axios";
 import { toast } from "react-toastify";
-import { toggleAuthPopup } from "./uiSlice";
-import { act } from "react";
+import { toggleAuthPopup } from "./popupSlice.js";
+import { toggleSidebar } from "./popupSlice.js";
 
  export const register = createAsyncThunk(
   "auth/register",
@@ -10,7 +10,7 @@ import { act } from "react";
     try{
       const response = await axiosInstance.post("/auth/register", data);
       toast.success(response.data.message);
-      thunkApi.dispatch(toggleAuthPopup);
+      thunkApi.dispatch(toggleAuthPopup());
       return response.data.user;
     }
     catch(error){
@@ -25,7 +25,7 @@ import { act } from "react";
     try{
       const response = await axiosInstance.post("/auth/login", data);
       toast.success(response.data.message);
-      thunkApi.dispatch(toggleAuthPopup);
+      thunkApi.dispatch(toggleAuthPopup());
       return response.data.user;
     }
     catch(error){
@@ -51,7 +51,7 @@ import { act } from "react";
   async (_, { thunkApi }) => {
     try{
       const response = await axiosInstance.get("/logout");
-      thunkApi.dispatch(toggleAuthPopup);
+      thunkApi.dispatch(toggleAuthPopup());
       return null;
     }
     catch(error){
@@ -104,7 +104,7 @@ import { act } from "react";
     }
   });
 
-    export const updateProfile = createAsyncThunk(
+  export const updateProfile = createAsyncThunk(
   "auth/me/update",
   async (data, { thunkApi }) => {
     try{

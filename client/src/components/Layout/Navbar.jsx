@@ -32,15 +32,15 @@ const Navbar = () => {
             {theme === "dark" ? <Sun className="h-6 w-6 text-foreground" /> : <Moon className="h-6 w-6 text-foreground" />}
           </button>
           {/* SEARCH */}
-          <button onClick={dispatch(toggleSearchBar)}  className="p-2 rounded-lg hover:bg-secondary transition-colors">
+          <button onClick={() => dispatch(toggleSearchBar())}  className="p-2 rounded-lg hover:bg-secondary transition-colors">
             <Search className="h-6 w-6 text-foreground" />
           </button>
           {/* USER Profile*/}
-          <button onClick={dispatch(toggleAuthPopup)} className="p-2 rounded-lg hover:bg-secondary transition-colors">
+          <button onClick={() => dispatch(toggleAuthPopup())} className="p-2 rounded-lg hover:bg-secondary transition-colors">
             <User className="h-6 w-6 text-foreground" />
           </button>
           {/* CART */}
-          <button onClick={dispatch(toggleCart)} className="relative p-2 rounded-lg hover:bg-secondary transition-colors">
+          <button onClick={() => dispatch(toggleCart())} className="relative p-2 rounded-lg hover:bg-secondary transition-colors">
             <ShoppingCart className="h-6 w-6 text-foreground" />
             {cartItemsCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
