@@ -13,7 +13,7 @@ const SearchOverlay = () => {
   const handleSearch = () => {
     if (searchQuery.trim() !== "") {
       dispatch(toggleSearchBar());
-      navigate(`/products/search?=${encodeURIComponent(searchQuery)}`);
+      navigate(`/products/search?q=${encodeURIComponent(searchQuery)}`);
     }
   };
   return <>
