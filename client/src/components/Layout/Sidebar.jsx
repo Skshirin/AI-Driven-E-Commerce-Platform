@@ -43,7 +43,7 @@ const Sidebar = () => {
       <h2 className="text-xl font-semibold text-primary">Menu</h2>
       <button
         onClick={() => dispatch(toggleSidebar())}
-        className="p-2 rounded-ld glass hover:glow-on-hover animate-smooth"
+        className="p-2 rounded-lg glass hover:glow-on-hover animate-smooth"
       >
         <X className="w-5 h-5 text-primary" />
       </button>
