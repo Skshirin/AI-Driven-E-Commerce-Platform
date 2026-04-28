@@ -22,10 +22,10 @@ const CartSidebar = () => {
   if (!isCartOpen) return null;
   return <>
   {/* overlay */}
-    <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-      onClick={() => dispatch(toggleCart())}
-    />
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+        onClick={() => dispatch(toggleCart())}
+      />
 
     {/* cartsidebar */}
 
