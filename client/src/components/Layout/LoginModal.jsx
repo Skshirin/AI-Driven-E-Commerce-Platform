@@ -31,7 +31,7 @@ const LoginModal = () => {
   useEffect(() => {
     if (location.pathname.startsWith("/password/reset")) {
       setMode("reset");
-      dispatch(toggleAuthPopup(true));
+      dispatch(toggleAuthPopup());
     }
   }, [location, dispatch]);
 
@@ -140,7 +140,7 @@ const LoginModal = () => {
             name: e.target.value,
           })
         }
-        className="w-full pl-10 pr-4z py-3 bg-secondary border border-border rounded-lg focus:outline-none"
+        className="w-full pl-10 pr-4 py-3 bg-secondary border border-border rounded-lg focus:outline-none"
         required
       />
 
@@ -160,7 +160,7 @@ const LoginModal = () => {
           setFormData({... formData, email: e.target.value})
       }}
       className="w-full pl-10 pr-4 py-3 bg-secondary border border-border rounded-lg
-      focus: outline-none"
+      focus:outline-none"
       required
       />
     </div>
@@ -226,7 +226,7 @@ const LoginModal = () => {
     text-primary-foreground rounded-lg font-semibold animate-smooth ${
       isLoading
       ? "opacity-70 cursor-not-allowed"
-      : "hover: glow-on-hover"
+      : "hover:glow-on-hover"
     }`}
     >
       {isLoading ? (

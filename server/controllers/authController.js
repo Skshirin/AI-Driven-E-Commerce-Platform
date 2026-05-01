@@ -72,7 +72,7 @@ export const logout = catchAsyncError(async (req,res,next) =>{
 
 export const forgotPassword = catchAsyncError(async (req,res,next) =>{
     const { email } = req.body;
-    const { frontendUrl } = req.body;
+    const { FRONTEND_URL } = req.body;
     let userResult = await database.query
         (`SELECT * FROM users WHERE email = $1`,
         [email]
@@ -90,7 +90,7 @@ export const forgotPassword = catchAsyncError(async (req,res,next) =>{
         [hashedToken, resetPasswordExpireTime / 1000, email]
     );
     
-    const resetPasswordUrl = `${frontendUrl}/password/reset/${resetToken}`;
+    const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
 
     const message = generateForgotPasswordEmailTemplate(resetPasswordUrl);
 

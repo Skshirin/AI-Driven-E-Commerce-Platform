@@ -186,7 +186,7 @@ import { toggleSidebar } from "./popupSlice.js";
     .addCase(resetPassword.pending, (state) => {
       state.isUpdatingPassword = true;
     })
-    .addCase(resetPassword.fulfilled, (state) => {
+    .addCase(resetPassword.fulfilled, (state, action) => { 
       state.isUpdatingPassword = false;
       state.authUser = action.payload;
     })
@@ -198,7 +198,6 @@ import { toggleSidebar } from "./popupSlice.js";
     })
     .addCase(updatePassword.fulfilled, (state) => {
       state.isUpdatingPassword = false;
-      state.authUser = action.payload;
     })
     .addCase(updatePassword.rejected, (state) => {
       state.isUpdatingPassword = false;
@@ -206,7 +205,7 @@ import { toggleSidebar } from "./popupSlice.js";
     .addCase(updateProfile.pending, (state) => {
       state.isUpdatingProfile = true;
     })
-    .addCase(updateProfile.fulfilled, (state) => {
+    .addCase(updateProfile.fulfilled, (state, action) => { 
       state.isUpdatingProfile = false;
       state.authUser = action.payload;
     })

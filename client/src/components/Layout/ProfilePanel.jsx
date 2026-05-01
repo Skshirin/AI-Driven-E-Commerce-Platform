@@ -13,7 +13,7 @@ const ProfilePanel = () => {
     (state) => state.auth
   );
   
-  const [showCurrentPassword, setShowCurrentPassword] = useState("false");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [name, setName] = useState(authUser?.name || "");
   const [email, setEmail] = useState(authUser?.email || "");
   const [avatar, setAvatar] = useState(null);
@@ -27,7 +27,7 @@ const ProfilePanel = () => {
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmNewPassword, setconfirmNewPassword] = useState("");
 
   const handleLogout = () => {
     dispatch(logout());
@@ -45,7 +45,7 @@ const ProfilePanel = () => {
     const formData = new FormData();
     formData.append("currentPassword", currentPassword);
     formData.append("newPassword", newPassword);
-    formData.append("confirmPassword", confirmPassword);
+    formData.append("confirmNewPassword", confirmNewPassword);
     dispatch(updatePassword(formData));
   }
 
@@ -67,7 +67,7 @@ const ProfilePanel = () => {
           Profile
         </h2>
         <button
-                onClick={() => dispatch(toggleAuthPopup)}
+                onClick={() => dispatch(toggleAuthPopup())}
                 className="p-2 rounded-lg glass hover:glow-on-hover animate-smooth"
               >
                 <X className="w-5 h-5 text-primary" />
@@ -159,7 +159,7 @@ const ProfilePanel = () => {
           type={showCurrentPassword ? "text" : "password"}
           placeholder="Confirm New Password"
           value={confirmNewPassword}
-          onChange={(e) => setConfirmNewPassword(e.target.value)}
+          onChange={(e) => setconfirmNewPassword(e.target.value)}
           className="w-full p-2 rounded border border-border bg-secondary text-foreground"
         />
 
@@ -178,7 +178,7 @@ const ProfilePanel = () => {
         
           
         <button onClick={handleUpdatePassword} className="flex justify-center items-center space-x-3 p-3
-          rounded-1g glass-card hover: glow-on-hover animate-smooth group w-full">
+          rounded-lg glass-card hover:glow-on-hover animate-smooth group w-full">
 
           {isUpdatingPassword ? (<>
           <div className={`w-5 h-5 border-2 border-white border-t-transparent rounded-full
