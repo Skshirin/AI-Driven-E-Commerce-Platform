@@ -52,7 +52,7 @@ const CartSidebar = () => {
               <Link to={"/products"} onClick={()=>dispatch(toggleCart())} 
               className="inline-block mt-4 px-6 py-2 gradient-primary text-primary-foreground
               rounded-lg hover:glow-on-hover animate-smooth">
-              Browse Products"</Link>
+              Browse Products </Link>
             </div>
           ) : (
             <>

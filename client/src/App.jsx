@@ -24,9 +24,10 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import { useSelector } from "react-redux";
 import { Loader } from "lucide-react";
-import { useEffect } from "react";
+import { use, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getUser } from "./store/slices/authSlice";
+import { fetchAllProducts } from "./store/slices/productSlice";
 
 const App = () => {
   const { authUser, isCheckingAuth } = useSelector((state) => state.auth);
@@ -34,6 +35,10 @@ const App = () => {
 
   useEffect(() => {
     dispatch(getUser());
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(fetchAllProducts());
   }, [dispatch]);
 
   if (isCheckingAuth && !authUser) {
