@@ -10,7 +10,7 @@ import { toggleSidebar } from "./popupSlice.js";
     try{
       const response = await axiosInstance.post("/auth/register", data);
       toast.success(response.data.message);
-      thunkApi.dispatch(toggleAuthPopup());
+      // thunkApi.dispatch(toggleAuthPopup());
       return response.data.user;
     }
     catch(error){
@@ -25,7 +25,7 @@ import { toggleSidebar } from "./popupSlice.js";
     try{
       const response = await axiosInstance.post("/auth/login", data);
       toast.success(response.data.message);
-      thunkApi.dispatch(toggleAuthPopup());
+      // thunkApi.dispatch(toggleAuthPopup());
       return response.data.user;
     }
     catch(error){
@@ -38,7 +38,7 @@ import { toggleSidebar } from "./popupSlice.js";
   "auth/getUser",
   async (_, { thunkApi }) => {
     try{
-      const response = await axiosInstance.get("/me");
+      const response = await axiosInstance.get("/auth/me");
       return response.data.user;
     }
     catch(error){
@@ -50,7 +50,7 @@ import { toggleSidebar } from "./popupSlice.js";
   "auth/logout",
   async (_, { thunkApi }) => {
     try{
-      const response = await axiosInstance.get("/logout");
+      const response = await axiosInstance.get("/auth/logout");
       thunkApi.dispatch(toggleAuthPopup());
       return null;
     }
